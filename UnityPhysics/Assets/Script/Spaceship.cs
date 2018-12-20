@@ -6,15 +6,27 @@ using UnityEngine.Experimental.UIElements;
 public class Spaceship : MonoBehaviour
 {
     public float height = 10f;
-    private float defaultSpeed = 20f;
-    public float calcForce;
+    public float defaultSpeed = 2f;
     public float calcSpeed;
-    public Rigidbody rigidBody;
-    public float proportionalHeight;
     public Vector3 proportionalDestiny;
-    public Vector3 finalDestination;
-    public Vector3 initialDestination;
-    public bool existDestiny;
+    public Vector3 currentDirection;
+    public float initialDistance;
+
+    public Vector3 currentDistance;
+    private Vector3 initialDestination;
+    private Vector3 finalDestination;
+    private float proportionalHeight;
+    private float calcForce;
+    private bool existDestiny;
+    private Rigidbody rigidBody;
+
+    void Start()
+    {
+        float distance = Vector3.Distance(new Vector3(9.7f,0,8.81f), new Vector3(21.9f, 0, 57.3f));//49
+        Debug.Log("SHOW DISTANCE: " +  distance);
+    }
+
+
     void Awake()
     {
         rigidBody = GetComponent<Rigidbody>();
@@ -31,17 +43,16 @@ public class Spaceship : MonoBehaviour
 	    {
 	        if (ht.transform.gameObject.GetComponent<TerrainControl>())
 	        {
+                //propulsão de altura
 	            proportionalHeight = (height - ht.distance);
+	            calcForce = height - rigidBody.velocity.y;
+	            Vector3 appliedHoverForce = (Vector3.up * proportionalHeight * (calcForce));
 
-	            proportionalDestiny = existDestiny ? (finalDestination - initialDestination) :  Vector3.zero;
-	            proportionalDestiny.y = 0;
+	            currentDistance = finalDestination - transform.position;
+                proportionalDestiny = existDestiny ? currentDistance / initialDistance :  Vector3.zero;
+	            calcSpeed = defaultSpeed * currentDistance.magnitude;
 
-                calcForce = height - rigidBody.velocity.y;
-	            calcSpeed = defaultSpeed - rigidBody.velocity.magnitude;
-	            
-                Vector3 appliedHoverForce = (Vector3.up * proportionalHeight * (calcForce)) +  (Vector3.Normalize(proportionalDestiny) * calcSpeed);
-
-
+	            appliedHoverForce += (proportionalDestiny*calcSpeed);
 
 	            rigidBody.AddForce(appliedHoverForce,ForceMode.Acceleration);
             }
@@ -61,7 +72,14 @@ public class Spaceship : MonoBehaviour
                 Debug.Log(hit.collider.gameObject.name +  " | " +  hit.point);
                 finalDestination = hit.point;
                 initialDestination = transform.position;
+
+                finalDestination.y = initialDestination.y = 0;
+
+                initialDistance = Vector3.Distance(finalDestination,initialDestination);
+
                 existDestiny = true;
+
+//                GameObject gb = (GameObject)Instantiate(Resources.Load("Capsule"));
             }
         }
     }
