@@ -79,7 +79,8 @@ public class Spaceship : MonoBehaviour
 
                 existDestiny = true;
 
-//                GameObject gb = (GameObject)Instantiate(Resources.Load("Capsule"));
+                GameObject gb = (GameObject)Instantiate(Resources.Load("Capsule"));
+                gb.transform.localPosition = finalDestination;
             }
         }
     }
